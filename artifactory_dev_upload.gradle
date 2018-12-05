@@ -1,0 +1,32 @@
+artifactoryPublish.skip = true
+
+artifactoryPublish.dependsOn('build')
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId = publishedGroupId
+            artifactId = artifactId
+            version = inHouseVersion
+
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+        }
+    }
+
+    artifactoryPublish() {
+        publications(publishing.publications.aar)
+    }
+}
+
+artifactory {
+    clientConfig.setIncludeEnvVars(true)
+    clientConfig.info.addEnvironmentProperty('test.adding.dynVar', new Date().toString())
+
+    contextUrl = System.getenv('ARTIFACTORY_CONTEX_URL')
+    publish {
+        repository {
+            repoKey = System.getenv('ARTIFACTORY_REPO_KEY')
+            username = System.getenv('ARTIFACTORY_USERNAME')
+            password = System.getenv('ARTIFACTORY_PASSWORD')
+        }
+    }
+}
